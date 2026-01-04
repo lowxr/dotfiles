@@ -99,7 +99,7 @@ We’ll carefully review each PR and provide feedback if needed to help you get 
 <!--
 ## 📞 Contact
 
-If you have any **Questions** or need **Help**, feel free to email me at [tsx@billoneta.xyz](mailto:tsx@billoneta.xyz) or better yet, start a discussion in our **[Github Community](../../discussions)**.
+If you have any **Questions** or need **Help**, feel free to email me at [tsx@wishware.dev](mailto:tsx@wishware.dev) or better yet, start a discussion in our **[Github Community](../../discussions)**.
 -->
 
 ## 📋 License
