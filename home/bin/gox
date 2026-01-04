@@ -1,0 +1,143 @@
+#!/bin/sh
+
+# gox - helper for Go projects
+
+set -e
+
+RED='\033[0;31m'
+GRN='\033[0;32m'
+YLW='\033[1;33m'
+NC='\033[0m' # No Color
+
+go_build() {
+    file="${1:-main.go}"
+    name="${file%.go}"
+    flags="$2"
+    echo -e "${YLW}Building $file...${NC}"
+    go build $flags -o "$name" "$file" && echo -e "${GRN}Compiled: $name${NC}"
+}
+
+check_go() {
+    if ! command -v go >/dev/null 2>&1; then
+        echo -e "${RED}Go is not installed or not in PATH.${NC}"
+        exit 1
+    fi
+}
+
+check_go
+
+cmd="$1"
+shift
+
+case "$cmd" in
+    run|"")
+        go run "${1:-main.go}"
+        ;;
+    build)
+        go_build "$1"
+        ;;
+    buildx)
+        go_build "$1" "-ldflags '-s -w'"
+        ;;
+    buildx-win)
+        go_build "$1" "-ldflags '-s -w -H=windowsgui'"
+        ;;
+    exec)
+        file="${1:-main.go}"
+        name="${file%.go}"
+        if [ ! -f "$name" ]; then
+            echo -e "${YLW}Not compiled yet. Compiling...${NC}"
+            "$0" build "$file" || exit 1
+        fi
+        "./$name"
+        ;;
+    buildrun)
+        "$0" build "$1" && "$0" exec "$1"
+        ;;
+    init)
+        go mod init "$1"
+        ;;
+    add)
+        go get "$@"
+        ;;
+    update)
+        go get -u ./...
+        ;;
+    tidy)
+        go mod tidy
+        ;;
+    clean|clear|purge)
+        echo -e "${YLW}Cleaning cache and binaries...${NC}"
+        go clean -x
+        go clean -modcache
+        [ -n "$GOCACHE" ] && rm -rf "$GOCACHE"
+        ;;
+    test)
+        go test ./... -v
+        ;;
+    cover)
+        go test ./... -cover
+        ;;
+    lint)
+        if ! command -v golangci-lint >/dev/null 2>&1; then
+            echo -e "${YLW}Installing golangci-lint...${NC}"
+            go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+        fi
+        golangci-lint run
+        ;;
+    fmt)
+        go fmt ./...
+        ;;
+    vet)
+        go vet ./...
+        ;;
+    deps)
+        go list -m all
+        ;;
+    outdated)
+        go list -u -m all
+        ;;
+    graph)
+        go mod graph
+        ;;
+    doc)
+        go doc "$@"
+        ;;
+    env)
+        go env
+        ;;
+    dev)
+        if ! command -v air >/dev/null 2>&1; then
+            echo -e "${YLW}Installing Air (hot reload)...${NC}"
+            go install github.com/cosmtrek/air@latest
+        fi
+        air
+        ;;
+    help|*)
+        echo "Usage: gox <command>"
+        echo ""
+        echo "Available commands:"
+        echo "  run [file]         Run a Go file"
+        echo "  build [file]       Build with debug symbols"
+        echo "  buildx [file]      Build optimized (stripped debug info)"
+        echo "  buildx-win [file]  Build for Windows GUI (no console window)"
+        echo "  exec [file]        Execute compiled binary"
+        echo "  buildrun [file]    Build and execute"
+        echo "  init <module>      Initialize a new module"
+        echo "  add <pkg>          Install dependencies"
+        echo "  update             Update dependencies"
+        echo "  tidy               Clean unused dependencies"
+        echo "  clean/clear/purge  Clean cache and binaries"
+        echo "  test               Run tests"
+        echo "  cover              Run tests with coverage"
+        echo "  lint               Run linter"
+        echo "  fmt                Format code"
+        echo "  vet                Static analysis"
+        echo "  deps               List dependencies"
+        echo "  outdated           List outdated dependencies"
+        echo "  graph              Show dependency graph"
+        echo "  doc <pkg>          Show package documentation"
+        echo "  env                Show Go environment variables"
+        echo "  dev                Development mode with hot reload"
+        ;;
+esac

@@ -1,0 +1,140 @@
+# Load Powerlevel10k prompt from cache for quick startup
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Oh My Zsh
+#
+# Source the Oh My Zsh framework
+export ZSH="$HOME/.oh-my-zsh"
+
+# Theme Background
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Basic Oh My Zsh Config
+#
+# Plugins
+plugins=(
+  git
+  z
+  nvm
+  npm
+  debian
+  golang
+  python
+  extract
+  command-not-found
+  zsh-autocomplete
+  zsh-syntax-highlighting
+  zsh-autosuggestions
+)
+
+# Completion & Correction
+CASE_SENSITIVE="true"
+HYPHEN_INSENSITIVE="true"
+ENABLE_CORRECTION="true"
+
+# Smart completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*' insert-tab pending
+zstyle ':omz:update' mode auto
+zstyle ':omz:update' verbose minimal
+
+# Improved history search
+autoload -U up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search
+bindkey "^[[B" down-line-or-beginning-search
+
+# Source Oh My Zsh
+source $ZSH/oh-my-zsh.sh
+
+# Environment Variables
+#
+# Default editor for Git, GH CLI, and other tools
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+# PATH bin
+[ ! -d "$HOME/.local/bin" ] && mkdir -p "$HOME/.local/bin"
+[[ ":$PATH:" != *":$HOME/.local/bin:"* ]] && export PATH="$HOME/.local/bin:$PATH"
+
+# Go env
+export GOPATH="$HOME/go"
+export GOBIN="$GOPATH/bin"
+export GOCACHE="$HOME/.cache/go-build"
+export GOTMPDIR="$HOME/.tmp/go-build"
+export GO111MODULE="on"
+
+# PATH
+export PATH="$PATH:$GOBIN"
+export PATH="$PATH:/var/lib/snapd/snap/bin"
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+nvm use --lts &>/dev/null
+
+# PNPM
+export PNPM_HOME="$HOME/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
+# Deno
+export PATH="$HOME/.deno/bin:$PATH"
+. "$HOME/.deno/env"
+
+# GPG-key for Git commits
+export GPG_TTY=$(tty)
+
+# Corepack for package managers
+export COREPACK_ENABLE_STRICT=0
+
+# Tool Integrations
+#
+# GitHub CLI Completions
+eval "$(gh completion --shell zsh)"
+
+# Atuin (better history)
+[ -f "$HOME/.atuin/bin/env" ] && source "$HOME/.atuin/bin/env"
+eval "$(atuin init zsh)" # or zsh --disable-up-arrow
+
+# Zoxide (better cd)
+eval "$(zoxide init zsh)"
+
+# My theme settings from `p10k configure`.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Aliases
+#
+# Clear
+alias cls="clear"
+alias clean="clear"
+alias purge="clear"
+
+# Dir listing with eza
+alias ls="eza --icons"
+alias la="eza --icons -a"
+alias ll="eza --icons -a -l --group-directories-first"
+alias lt="eza --icons -a --tree --level=2"
+
+# File viewing with bat
+alias cat='bat --style=plain --color=always --paging=never --line-range :200'
+alias catf='bat --style=plain'
+
+# Search + preview
+alias ff='fzf --preview "bat --style=plain --color=always --paging=never --line-range :200 {}"'
+
+# Edit with Neovim + fzf
+alias vf='nvim $(fzf)'
+
+# Fast navigation with zoxide
+alias cd='z'
+
+# Modern alternatives
+alias neofetch="fastfetch"

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# updates - check or apply system updates (DNF)
+
+cmd="$1"
+
+updates=$(dnf check-update 2>/dev/null | grep -c '^[a-zA-Z0-9]')
+
+case "$cmd" in
+    start)
+        if [ "$updates" -gt 0 ]; then
+            echo "Updating $updates packages..."
+            sudo dnf upgrade --refresh -y
+        else
+            echo "System is already up to date."
+        fi
+        ;;
+    *)
+        echo "$updates"
+        ;;
+esac
