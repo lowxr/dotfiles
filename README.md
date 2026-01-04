@@ -14,6 +14,7 @@
 
 ---
 
+<!--
 ## 📸 Preview
 
 <table align="center">
@@ -28,6 +29,7 @@
 </table>
 
 ...Soon more, For now this version is only for console wsl mode, combining Windows with Linux. In the future, I will add full Linux system mode.
+-->
 
 ## 🤖 Setup
 
